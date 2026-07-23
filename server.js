@@ -65,6 +65,11 @@ adminApp.get('/api/products', (req, res) => {
     res.json(readData(PRODUCTS_FILE));
 });
 
+// Root endpoint
+adminApp.get('/', (req, res) => {
+    res.send("<h1>Floriko API Server je plně funkční 🌿</h1><p>Tato adresa slouží jako databázové pozadí. Pro nákup prosím navštivte váš e-shop na Netlify.</p>");
+});
+
 // Import Product from Link
 adminApp.post('/api/import', async (req, res) => {
     const { url } = req.body;
