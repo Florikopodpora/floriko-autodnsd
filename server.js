@@ -193,18 +193,15 @@ Hlavní výhody:
     } catch (error) {
         console.error("Scraping failed: ", error.message);
         
-        // Generate fallback reviews and fallback images array
-        const defaultImages = ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500'];
         const fallbackProduct = {
             id: 'prod_' + Math.random().toString(36).substr(2, 9),
-            title: `Produkt z ${domain.toUpperCase()}`,
+            title: "",
             supplier: domain.split('.')[0] || 'supplier',
             cost: "",
             suggestedRetail: "",
-            image: defaultImages[0],
-            images: defaultImages,
-            description: `AI Přehled:
-Tento produkt byl naimportován z webu ${domain}. Zadejte prosím podrobnosti o produktu ručně v přehledu výše.`,
+            image: "",
+            images: [],
+            description: "",
             reviews: [
                 { author: "AliExpress Shopper | 02 Jun 2026", rating: 5, text: "Product matches the description, not yet tested." },
                 { author: "U***r | 01 Apr 2026", rating: 5, text: "Excellent oscillating sprinkler design, works perfectly for lawn watering." },
