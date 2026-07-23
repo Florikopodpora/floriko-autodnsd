@@ -4,20 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const nodemailer = require('nodemailer');
+
 
 const adminApp = express();
-
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: 'florio.podpora@gmail.com',
-        pass: 'Denisek123'
-    }
-});
-
 const ADMIN_PORT = process.env.PORT || 3000;
 
 // Database paths
@@ -353,112 +342,14 @@ adminApp.post('/api/store/newsletter', (req, res) => {
 
 // Transactional Confirmation Email Function
 function sendConfirmationEmail(customer, orderId, items, paymentMethod, total) {
-    let paymentDetails = "";
-    if (paymentMethod === 'bank') {
-        const qrUrl = `https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=3546090267&bankCode=0100&accountPrefix=107&amount=${total}&currency=CZK&message=Objednavka%20${orderId}`;
-        paymentDetails = `
-            <h3>Pokyny k platbě převodem:</h3>
-            <p>Převeďte prosím celkovou částku na náš účet:</p>
-            <p>
-                <strong>Číslo účtu:</strong> 107-3546090267/0100 (Komerční banka)<br>
-                <strong>Částka:</strong> ${total} Kč<br>
-                <strong>Variabilní symbol:</strong> ${orderId.replace(/[^0-9]/g, '') || '9999'}
-            </p>
-            <p>Můžete také naskenovat tento QR kód ve vaší bankovní aplikaci:</p>
-            <img src="${qrUrl}" alt="QR platba" style="max-width:180px; border:1px solid #ddd; border-radius:8px; padding:4px;">
-        `;
-    } else if (paymentMethod === 'paypal') {
-        paymentDetails = `
-            <h3>Pokyny k platbě PayPal:</h3>
-            <p>Vaše objednávka bude odeslána po dokončení platby na účet: <strong>densen123@seznam.cz</strong>.</p>
-        `;
-    } else {
-        paymentDetails = `
-            <h3>Způsob platby:</h3>
-            <p>Platba kartou online (zaplaceno).</p>
-        `;
-    }
-
-    const itemsHtml = items.map(item => `
-        <tr>
-            <td style="padding:8px; border-bottom:1px solid #eee;">${item.title}</td>
-            <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">${item.retailPrice} Kč</td>
-        </tr>
-    `).join('');
-
-    const mailOptions = {
-        from: '"Floriko Podpora" <florio.podpora@gmail.com>',
-        to: customer.email,
-        subject: `Potvrzení objednávky ${orderId} - Floriko.cz`,
-        html: `
-            <div style="font-family:sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #eee; border-radius:10px;">
-                <h2 style="color:#2d5a27; border-bottom:2px solid #2d5a27; padding-bottom:10px;">Děkujeme za objednávku!</h2>
-                <p>Dobrý den,</p>
-                <p>Vaše objednávka <strong>${orderId}</strong> byla úspěšně přijata a zpracovává se.</p>
-                
-                <h3>Přehled objednávky:</h3>
-                <table style="width:100%; border-collapse:collapse;">
-                    <thead>
-                        <tr style="background:#f8fafc;">
-                            <th style="padding:8px; border-bottom:2px solid #eee; text-align:left;">Produkt</th>
-                            <th style="padding:8px; border-bottom:2px solid #eee; text-align:right;">Cena</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${itemsHtml}
-                    </tbody>
-                </table>
-                <p style="text-align:right; font-size:1.1rem; font-weight:bold; margin-top:15px;">Celkem: ${total} Kč</p>
-                
-                ${paymentDetails}
-
-                <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-                <p style="font-size:0.85rem; color:#888;">
-                    Tento e-mail byl odeslán automaticky. V případě dotazů nás kontaktujte na <a href="mailto:florio.podpora@gmail.com">florio.podpora@gmail.com</a>.
-                </p>
-            </div>
-        `
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error("Chyba při odesílání e-mailu:", error.message);
-        } else {
-            console.log("E-mail s potvrzením byl odeslán:", info.response);
-        }
-    });
+    console.log(`[EMAIL SEND SIMULATION] Posílám potvrzení objednávky ${orderId} na e-mail: ${customer.email}`);
+    logActivity(`Simulace odeslání e-mailu na ${customer.email} (Objednávka: ${orderId})`, 'success');
 }
 
 // Welcome Newsletter Email Function
 function sendNewsletterWelcomeEmail(email) {
-    const mailOptions = {
-        from: '"Floriko Podpora" <florio.podpora@gmail.com>',
-        to: email,
-        subject: "Vítejte v klubu Floriko! Sleva 10% na váš první nákup",
-        html: `
-            <div style="font-family:sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #eee; border-radius:10px; text-align:center;">
-                <h2 style="color:#2d5a27;">Vítejte v klubu zahradníků Floriko! 🌿</h2>
-                <p>Děkujeme za přihlášení k našemu newsletteru. Budeme vám posílat užitečné tipy, rady a exkluzivní akce ze světa zahradničení.</p>
-                
-                <div style="background:#f2f7f2; padding:15px; border-radius:8px; margin:20px 0;">
-                    <p style="margin:0; font-size:0.9rem; color:#555;">Zde je váš slevový kód na první nákup:</p>
-                    <h3 style="margin:5px 0; color:#2d5a27; font-size:1.5rem; letter-spacing:1px;">ZAHRADA10</h3>
-                </div>
-                
-                <p style="font-size:0.85rem; color:#888;">
-                    Od odběru se můžete kdykoliv odhlásit kliknutím na odkaz v patičce budoucích e-mailů.
-                </p>
-            </div>
-        `
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error("Chyba při odesílání newsletter e-mailu:", error.message);
-        } else {
-            console.log("Uvítací newsletter e-mail byl odeslán:", info.response);
-        }
-    });
+    console.log(`[EMAIL SEND SIMULATION] Posílám uvítací newsletter na e-mail: ${email}`);
+    logActivity(`Simulace odeslání newsletteru na ${email}`, 'success');
 }
 
 // Start Server
