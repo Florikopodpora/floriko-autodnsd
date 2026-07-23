@@ -276,9 +276,21 @@ adminApp.get('/api/store/products', (req, res) => {
 
 // Store Submit Order
 adminApp.post('/api/store/order', (req, res) => {
-    const { customer, items, paymentMethod, total } = req.body;
+    const { customer, items, paymentMethod, total, couponUsed } = req.body;
     if (!customer || !items || items.length === 0) {
         return res.status(400).json({ error: "Chybí informace o zákazníkovi nebo produkty" });
+    }
+
+    // Process coupon deactivation if used
+    if (couponUsed) {
+        let coupons = readData(COUPONS_FILE);
+        const codeToDelete = couponUsed.toUpperCase().trim();
+        const initialLen = coupons.length;
+        coupons = coupons.filter(c => c.code !== codeToDelete);
+        if (coupons.length < initialLen) {
+            writeData(COUPONS_FILE, coupons);
+            logActivity(`Slevový kupón ${codeToDelete} byl úspěšně použit a deaktivován.`, 'info');
+        }
     }
 
     const orders = readData(ORDERS_FILE);
