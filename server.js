@@ -14,11 +14,13 @@ const DB_DIR = path.join(__dirname, 'data');
 const PRODUCTS_FILE = path.join(DB_DIR, 'products.json');
 const ORDERS_FILE = path.join(DB_DIR, 'orders.json');
 const ACTIVITY_FILE = path.join(DB_DIR, 'activity.json');
+const COUPONS_FILE = path.join(DB_DIR, 'coupons.json');
 
 // Ensure database files exist
 if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR);
 if (!fs.existsSync(PRODUCTS_FILE)) fs.writeFileSync(PRODUCTS_FILE, JSON.stringify([]));
 if (!fs.existsSync(ORDERS_FILE)) fs.writeFileSync(ORDERS_FILE, JSON.stringify([]));
+if (!fs.existsSync(COUPONS_FILE)) fs.writeFileSync(COUPONS_FILE, JSON.stringify([ { code: "ZAHRADA10", discount: 10 } ]));
 if (!fs.existsSync(ACTIVITY_FILE)) {
     fs.writeFileSync(ACTIVITY_FILE, JSON.stringify([
         { text: "Server úspěšně spuštěn a databáze připravena", time: new Date().toLocaleTimeString('cs-CZ'), type: "success" }
@@ -329,6 +331,53 @@ function sendNewsletterWelcomeEmail(email) {
     console.log(`[EMAIL SEND SIMULATION] Posílám uvítací newsletter na e-mail: ${email}`);
     logActivity(`Simulace odeslání newsletteru na ${email}`, 'success');
 }
+
+// ================= COUPONS ENDPOINTS =================
+
+// Storefront - Get Coupons (validation)
+adminApp.get('/api/store/coupons', (req, res) => {
+    res.json(readData(COUPONS_FILE));
+});
+
+// Admin - Get Coupons
+adminApp.get('/api/coupons', (req, res) => {
+    res.json(readData(COUPONS_FILE));
+});
+
+// Admin - Add Coupon
+adminApp.post('/api/coupons', (req, res) => {
+    const coupons = readData(COUPONS_FILE);
+    const { code, discount } = req.body;
+    if (!code || !discount) {
+        return res.status(400).json({ error: "Chybí kód kupónu nebo hodnota slevy" });
+    }
+
+    const cleanCode = code.toUpperCase().trim();
+    if (coupons.find(c => c.code === cleanCode)) {
+        return res.status(400).json({ error: "Tento kód kupónu již existuje" });
+    }
+
+    coupons.push({ code: cleanCode, discount: parseFloat(discount) || 0 });
+    writeData(COUPONS_FILE, coupons);
+    logActivity(`Byl vytvořen slevový kupón ${cleanCode} (${discount}%)`, 'success');
+    res.json({ success: true });
+});
+
+// Admin - Delete Coupon
+adminApp.delete('/api/coupons/:code', (req, res) => {
+    let coupons = readData(COUPONS_FILE);
+    const code = req.params.code.toUpperCase().trim();
+    const exists = coupons.find(c => c.code === code);
+    
+    if (exists) {
+        coupons = coupons.filter(c => c.code !== code);
+        writeData(COUPONS_FILE, coupons);
+        logActivity(`Byl smazán slevový kupón ${code}`, 'warning');
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: "Kupón nenalezen" });
+    }
+});
 
 // Start Server
 adminApp.listen(ADMIN_PORT, () => {
