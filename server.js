@@ -166,14 +166,6 @@ Hlavní výhody:
 - Vysoká odolnost vůči povětrnostním vlivům
 - Zajišťuje efektivní péči o rostliny a záhony` : "";
 
-        // Highly realistic AliExpress reviews
-        const mockAliReviews = [
-            { author: "AliExpress Shopper | 02 Jun 2026", rating: 5, text: "Product matches the description, not yet tested." },
-            { author: "U***r | 01 Apr 2026", rating: 5, text: "Excellent oscillating sprinkler design, works perfectly for lawn watering." },
-            { author: "A***a | 15 May 2026", rating: 4, text: "Good quality material. Very fast shipping, well packed." },
-            { author: "J***r | 10 May 2026", rating: 5, text: "Fast delivery, works as described. Tightly sealed, no leakage." }
-        ];
-
         const parsedProduct = {
             id: 'prod_' + Math.random().toString(36).substr(2, 9),
             title: title ? (title.length > 80 ? title.substring(0, 80) + '...' : title) : "",
@@ -183,7 +175,7 @@ Hlavní výhody:
             image: image,
             images: images,
             description: aiOverview,
-            reviews: mockAliReviews,
+            reviews: [],
             specs: specs,
             pdfManual: pdfManual
         };
@@ -202,20 +194,9 @@ Hlavní výhody:
             image: "",
             images: [],
             description: "",
-            reviews: [
-                { author: "AliExpress Shopper | 02 Jun 2026", rating: 5, text: "Product matches the description, not yet tested." },
-                { author: "U***r | 01 Apr 2026", rating: 5, text: "Excellent oscillating sprinkler design, works perfectly for lawn watering." },
-                { author: "A***a | 15 May 2026", rating: 4, text: "Good quality material. Very fast shipping, well packed." },
-                { author: "J***r | 10 May 2026", rating: 5, text: "Fast delivery, works as described. Tightly sealed, no leakage." }
-            ],
-            specs: {
-                "Použití": "Zahradní rozstřikovač trávníku",
-                "Modelové číslo": "GM-7080-GO",
-                "Typ rozstřikovače": "Oscilační (kmitavý)",
-                "Původ": "Čína",
-                "Nebezpečné chemikálie": "Žádné"
-            },
-            pdfManual: "https://floriko.cz/manuals/GM-7080-GO-user-manual.pdf"
+            reviews: [],
+            specs: {},
+            pdfManual: ""
         };
 
         logActivity(`Import z ${domain} vyžaduje ruční zadání cen.`, 'warning');
