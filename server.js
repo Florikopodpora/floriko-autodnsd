@@ -15,6 +15,7 @@ const PRODUCTS_FILE = path.join(DB_DIR, 'products.json');
 const ORDERS_FILE = path.join(DB_DIR, 'orders.json');
 const ACTIVITY_FILE = path.join(DB_DIR, 'activity.json');
 const COUPONS_FILE = path.join(DB_DIR, 'coupons.json');
+const GIT_TOKEN = process.env.GITHUB_TOKEN || null;
 
 // Ensure database files exist
 if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR);
@@ -30,6 +31,46 @@ if (!fs.existsSync(ACTIVITY_FILE)) {
 // Helpers to read/write DB
 const readData = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 const writeData = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2));
+
+// GitHub Auto-Sync Helper
+const gitSync = async (filePath, repoPath, token) => {
+    if (!token) return;
+    try {
+        const owner = "Florikopodpora";
+        const repo = "floriko-autodnsd";
+        const url = `https://api.github.com/repos/${owner}/${repo}/contents/${repoPath}`;
+        
+        let sha = null;
+        try {
+            const getRes = await axios.get(url, {
+                headers: { 
+                    'Authorization': `token ${token}`,
+                    'User-Agent': 'AutoDS-Admin-Sync'
+                }
+            });
+            sha = getRes.data.sha;
+        } catch (e) {
+            // File might not exist on repo yet
+        }
+        
+        const content = fs.readFileSync(filePath, 'utf8');
+        const contentBase64 = Buffer.from(content).toString('base64');
+        
+        await axios.put(url, {
+            message: `Auto-sync: Aktualizace ${repoPath} [skip ci]`,
+            content: contentBase64,
+            sha: sha
+        }, {
+            headers: { 
+                'Authorization': `token ${token}`,
+                'User-Agent': 'AutoDS-Admin-Sync'
+            }
+        });
+        console.log(`[GIT SYNC] Soubor ${repoPath} úspěšně nahrán na GitHub.`);
+    } catch (err) {
+        console.error(`[GIT SYNC ERROR] Chyba synchronizace ${repoPath}:`, err.response ? err.response.data : err.message);
+    }
+};
 
 // Log Activity Helper
 const logActivity = (text, type = 'info') => {
@@ -221,6 +262,12 @@ adminApp.post('/api/products', (req, res) => {
     
     writeData(PRODUCTS_FILE, products);
     logActivity(`Uložen produkt: ${newProduct.title}`, 'success');
+
+    // Trigger GitHub Auto-Sync if token is present
+    if (GIT_TOKEN) {
+        gitSync(PRODUCTS_FILE, 'data/products.json', GIT_TOKEN);
+    }
+
     res.json({ success: true });
 });
 
@@ -234,6 +281,12 @@ adminApp.delete('/api/products/:id', (req, res) => {
         products = products.filter(p => p.id !== id);
         writeData(PRODUCTS_FILE, products);
         logActivity(`Odstraněn produkt: ${item.title}`, 'info');
+
+        // Trigger GitHub Auto-Sync if token is present
+        if (GIT_TOKEN) {
+            gitSync(PRODUCTS_FILE, 'data/products.json', GIT_TOKEN);
+        }
+
         res.json({ success: true });
     } else {
         res.status(404).json({ error: "Produkt nenalezen" });
@@ -290,6 +343,10 @@ adminApp.post('/api/store/order', (req, res) => {
         if (coupons.length < initialLen) {
             writeData(COUPONS_FILE, coupons);
             logActivity(`Slevový kupón ${codeToDelete} byl úspěšně použit a deaktivován.`, 'info');
+            
+            if (GIT_TOKEN) {
+                gitSync(COUPONS_FILE, 'data/coupons.json', GIT_TOKEN);
+            }
         }
     }
 
@@ -372,6 +429,11 @@ adminApp.post('/api/coupons', (req, res) => {
     coupons.push({ code: cleanCode, discount: parseFloat(discount) || 0 });
     writeData(COUPONS_FILE, coupons);
     logActivity(`Byl vytvořen slevový kupón ${cleanCode} (${discount}%)`, 'success');
+
+    if (GIT_TOKEN) {
+        gitSync(COUPONS_FILE, 'data/coupons.json', GIT_TOKEN);
+    }
+
     res.json({ success: true });
 });
 
@@ -385,6 +447,11 @@ adminApp.delete('/api/coupons/:code', (req, res) => {
         coupons = coupons.filter(c => c.code !== code);
         writeData(COUPONS_FILE, coupons);
         logActivity(`Byl smazán slevový kupón ${code}`, 'warning');
+
+        if (GIT_TOKEN) {
+            gitSync(COUPONS_FILE, 'data/coupons.json', GIT_TOKEN);
+        }
+
         res.json({ success: true });
     } else {
         res.status(404).json({ error: "Kupón nenalezen" });
