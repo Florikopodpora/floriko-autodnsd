@@ -476,8 +476,76 @@ const getTransporter = async () => {
     });
 };
 
+// Resend HTTP API Sender (Immune to cloud SMTP port blocks, uses HTTPS port 443)
+const sendViaResend = async (to, subject, htmlContent) => {
+    try {
+        const response = await axios.post('https://api.resend.com/emails', {
+            from: `Floriko E-shop <${process.env.EMAIL_FROM || 'onboarding@resend.dev'}>`,
+            to: to,
+            subject: subject,
+            html: htmlContent
+        }, {
+            headers: {
+                'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(`[RESEND SENT] E-mail "${subject}" odeslán přes Resend API na ${to}`);
+        logActivity(`E-mail "${subject}" odeslán přes Resend na ${to}`, 'success');
+        return true;
+    } catch (err) {
+        console.error(`[RESEND ERROR] Chyba odesílání přes Resend:`, err.response ? err.response.data : err.message);
+        logActivity(`Chyba Resend e-mailu na ${to}: ${err.message}`, 'warning');
+        return false;
+    }
+};
+
+// SendGrid HTTP API Sender (Immune to cloud SMTP port blocks, uses HTTPS port 443, allows single verified personal email without domain)
+const sendViaSendGrid = async (to, subject, htmlContent) => {
+    try {
+        const response = await axios.post('https://api.sendgrid.com/v3/mail/send', {
+            personalizations: [{
+                to: [{ email: to }]
+            }],
+            from: {
+                email: process.env.EMAIL_FROM || 'floriko.podpora@gmail.com',
+                name: 'Floriko E-shop'
+            },
+            subject: subject,
+            content: [{
+                type: 'text/html',
+                value: htmlContent
+            }]
+        }, {
+            headers: {
+                'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(`[SENDGRID SENT] E-mail "${subject}" odeslán přes SendGrid API na ${to}`);
+        logActivity(`E-mail "${subject}" odeslán přes SendGrid na ${to}`, 'success');
+        return true;
+    } catch (err) {
+        console.error(`[SENDGRID ERROR] Chyba odesílání přes SendGrid:`, err.response ? err.response.data : err.message);
+        logActivity(`Chyba SendGrid e-mailu na ${to}: ${err.message}`, 'warning');
+        return false;
+    }
+};
+
 // Send HTML Email Wrapper
 const sendHtmlEmail = async (to, subject, htmlContent) => {
+    // 1. Prefer SendGrid if API key is set (ideal for single verified personal emails without domain)
+    if (process.env.SENDGRID_API_KEY) {
+        const success = await sendViaSendGrid(to, subject, htmlContent);
+        if (success) return;
+    }
+
+    // 2. Fallback to Resend if API key is set
+    if (process.env.RESEND_API_KEY) {
+        const success = await sendViaResend(to, subject, htmlContent);
+        if (success) return;
+    }
+
     const transporter = await getTransporter();
     if (!transporter) {
         console.log(`[EMAIL SIMULATION] Na ${to} odesílám: "${subject}"`);
