@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "id": "prod_o3jzqv6ix",
+    "title": "",
+    "supplier": "aliexpress",
+    "cost": 0,
+    "suggestedRetail": "",
+    "image": "https://ae-pic-a1.aliexpress-media.com/kf/S37ea85f7abc94c0ab41cbedda02bae7eA.jpg_220x220q75.jpg_.avif",
+    "images": [
+      "https://ae-pic-a1.aliexpress-media.com/kf/S37ea85f7abc94c0ab41cbedda02bae7eA.jpg_220x220q75.jpg_.avif"
+    ],
+    "description": "",
+    "reviews": [],
+    "specs": {},
+    "pdfManual": "",
+    "retailPrice": 0,
+    "category": "other"
+  }
+]
