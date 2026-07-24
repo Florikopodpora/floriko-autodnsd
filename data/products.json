@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "prod_tbfn4gccd",
+    "title": "ZKOUSKA",
+    "supplier": "aliexpress",
+    "cost": 27,
+    "suggestedRetail": "",
+    "image": "",
+    "images": [],
+    "description": "",
+    "reviews": [],
+    "specs": {},
+    "pdfManual": "",
+    "retailPrice": 30,
+    "category": "other"
+  }
+]
