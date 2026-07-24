@@ -441,12 +441,25 @@ adminApp.post('/api/store/welcome-email', (req, res) => {
 });
 
 // Nodemailer Transport Configuration
-const getTransporter = () => {
+const getTransporter = async () => {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         return null;
     }
-    const host = process.env.EMAIL_HOST || (process.env.EMAIL_USER.includes('@gmail.com') ? 'smtp.gmail.com' : 'smtp.seznam.cz');
-    // Default to port 587 for cloud servers to bypass port blocks, secure: false
+    const originalHost = process.env.EMAIL_HOST || (process.env.EMAIL_USER.includes('@gmail.com') ? 'smtp.gmail.com' : 'smtp.seznam.cz');
+    let host = originalHost;
+
+    // Dynamically resolve hostname to IPv4 address only, bypassing Node's dual-stack IPv6 preferences
+    try {
+        const dnsPromises = require('dns').promises;
+        const addresses = await dnsPromises.resolve4(host);
+        if (addresses && addresses.length > 0) {
+            host = addresses[0];
+            console.log(`[EMAIL DNS] Resolved SMTP ${originalHost} to IPv4: ${host}`);
+        }
+    } catch (dnsErr) {
+        console.error(`[EMAIL DNS ERROR] Failed to resolve IPv4 for ${host}:`, dnsErr.message);
+    }
+
     const port = process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : 587;
     return nodemailer.createTransport({
         host: host,
@@ -457,15 +470,15 @@ const getTransporter = () => {
             pass: process.env.EMAIL_PASS
         },
         tls: {
-            rejectUnauthorized: false // bypass TLS certificate warnings
-        },
-        family: 4 // Force IPv4 to prevent IPv6 ENETUNREACH errors on cloud hostings
+            rejectUnauthorized: false,
+            servername: originalHost // Set SNI servername to bypass SSL certificate mismatch when connecting to IP
+        }
     });
 };
 
 // Send HTML Email Wrapper
 const sendHtmlEmail = async (to, subject, htmlContent) => {
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
     if (!transporter) {
         console.log(`[EMAIL SIMULATION] Na ${to} odesílám: "${subject}"`);
         logActivity(`Simulace odeslání e-mailu na ${to} (${subject})`, 'success');
