@@ -458,7 +458,8 @@ const getTransporter = () => {
         },
         tls: {
             rejectUnauthorized: false // bypass TLS certificate warnings
-        }
+        },
+        family: 4 // Force IPv4 to prevent IPv6 ENETUNREACH errors on cloud hostings
     });
 };
 
