@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const nodemailer = require('nodemailer');
 
 
 const adminApp = express();
@@ -310,6 +311,12 @@ adminApp.post('/api/orders/:id/fulfill', (req, res) => {
         order.status = 'Fulfilled';
         writeData(ORDERS_FILE, orders);
         logActivity(`Objednávka #${id} byla vyřízena a plnění odesláno dodavateli`, 'success');
+        
+        // Trigger shipping confirmation email to customer
+        if (order.customerDetails && order.customerDetails.email) {
+            sendShippingEmail(order.customerDetails.name, order.customerDetails.email, id.split('-')[0]);
+        }
+
         res.json({ success: true });
     } else {
         res.status(404).json({ error: "Objednávka nenalezena" });
@@ -414,20 +421,276 @@ adminApp.post('/api/store/newsletter', (req, res) => {
         return res.status(400).json({ error: "Chybí e-mail" });
     }
 
-    sendNewsletterWelcomeEmail(email);
+    sendWelcomeEmail(email.split('@')[0], email);
     res.json({ success: true });
 });
 
-// Transactional Confirmation Email Function
-function sendConfirmationEmail(customer, orderId, items, paymentMethod, total) {
-    console.log(`[EMAIL SEND SIMULATION] Posílám potvrzení objednávky ${orderId} na e-mail: ${customer.email}`);
-    logActivity(`Simulace odeslání e-mailu na ${customer.email} (Objednávka: ${orderId})`, 'success');
+// Welcome Email on Registration
+adminApp.post('/api/store/welcome-email', (req, res) => {
+    const { name, email } = req.body;
+    if (!email) {
+        return res.status(400).json({ error: "Chybí e-mail" });
+    }
+
+    sendWelcomeEmail(name || email.split('@')[0], email);
+    res.json({ success: true });
+});
+
+// Nodemailer Transport Configuration
+const getTransporter = () => {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        return null;
+    }
+    const host = process.env.EMAIL_HOST || (process.env.EMAIL_USER.includes('@gmail.com') ? 'smtp.gmail.com' : 'smtp.seznam.cz');
+    const port = process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : 465;
+    return nodemailer.createTransport({
+        host: host,
+        port: port,
+        secure: port === 465,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+};
+
+// Send HTML Email Wrapper
+const sendHtmlEmail = async (to, subject, htmlContent) => {
+    const transporter = getTransporter();
+    if (!transporter) {
+        console.log(`[EMAIL SIMULATION] Na ${to} odesílám: "${subject}"`);
+        logActivity(`Simulace odeslání e-mailu na ${to} (${subject})`, 'success');
+        return;
+    }
+
+    try {
+        await transporter.sendMail({
+            from: `"Floriko E-shop" <${process.env.EMAIL_USER}>`,
+            to: to,
+            subject: subject,
+            html: htmlContent
+        });
+        console.log(`[EMAIL SENT] E-mail "${subject}" odeslán na ${to}`);
+        logActivity(`E-mail "${subject}" byl odeslán na ${to}`, 'success');
+    } catch (err) {
+        console.error(`[EMAIL ERROR] Chyba odesílání na ${to}:`, err.message);
+        logActivity(`Chyba odeslání e-mailu na ${to}: ${err.message}`, 'warning');
+    }
+};
+
+// 1. Welcome Account Template
+function sendWelcomeEmail(name, email) {
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Vítejte ve Floriko</title>
+        <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f7fafc; color: #2d3748; margin: 0; padding: 20px; }
+            .card { max-width: 600px; background: #ffffff; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+            .header { background: #1b4d3e; color: #ffffff; padding: 40px 20px; text-align: center; }
+            .header h1 { margin: 0; font-size: 24px; font-weight: 700; }
+            .content { padding: 40px 30px; line-height: 1.6; }
+            .gift-box { background: #f0fdf4; border: 1px dashed #4ade80; border-radius: 12px; padding: 20px; text-align: center; margin: 25px 0; }
+            .coupon { font-size: 22px; font-weight: 800; color: #1b4d3e; letter-spacing: 2px; margin: 10px 0; display: inline-block; padding: 8px 20px; background: #ffffff; border-radius: 30px; border: 1px solid #1b4d3e; }
+            .footer { background: #edf2f7; text-align: center; padding: 20px; font-size: 12px; color: #718096; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="header">
+                <h1>Vítejte v zahradě Floriko 🌿</h1>
+            </div>
+            <div class="content">
+                <p>Ahoj ${name},</p>
+                <p>děkujeme, že jste se registroval(a) na našem e-shopu <strong>Floriko</strong>. Jsme moc rádi, že sdílíte naši vášeň pro minimalistickou zahradní estetiku.</p>
+                
+                <p>Jako poděkování a uvítací dárek jsme pro vás připravili <strong>slevu 10%</strong> na váš první nákup!</p>
+                
+                <div class="gift-box">
+                    <p style="margin: 0; font-weight: bold; color: #166534;">Váš slevový kód:</p>
+                    <div class="coupon">FLORIKO-VITEJ-10</div>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #166534;">(Kód stačí zadat v košíku před placením)</p>
+                </div>
+
+                <p>Užijte si nakupování designových květináčů, zavlažování a moderního osvětlení.</p>
+                <p style="margin-top: 30px;">Krásný den,<br><strong>Tým Floriko</strong></p>
+            </div>
+            <div class="footer">
+                Tento e-mail byl odeslán na adresu ${email}.<br>
+                © 2026 Floriko.cz. Všechna práva vyhrazena.
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+    sendHtmlEmail(email, "Vítejte ve Floriko 🌿 Slevový kód 10% uvnitř!", html);
 }
 
-// Welcome Newsletter Email Function
-function sendNewsletterWelcomeEmail(email) {
-    console.log(`[EMAIL SEND SIMULATION] Posílám uvítací newsletter na e-mail: ${email}`);
-    logActivity(`Simulace odeslání newsletteru na ${email}`, 'success');
+// 2. Order Confirmation Template
+function sendConfirmationEmail(customer, orderId, items, paymentMethod, total) {
+    let paymentInstructions = "";
+    if (paymentMethod === 'bank') {
+        paymentInstructions = `
+            <div class="box">
+                <h3 style="color: #1b4d3e; margin-top: 0;">Pokyny k platbě převodem:</h3>
+                <p>Prosím, převeďte částku <strong>${total} Kč</strong> na náš bankovní účet:</p>
+                <p style="line-height: 1.5; font-size: 15px;">
+                    <strong>Číslo účtu:</strong> 107-3546090267/0100<br>
+                    <strong>Banka:</strong> Komerční banka<br>
+                    <strong>Částka:</strong> ${total} Kč<br>
+                    <strong>Variabilní symbol:</strong> ${orderId.replace(/[^0-9]/g, '') || '9999'}
+                </p>
+                <p style="font-size: 13px; color: #718096;">Objednávku odešleme ihned po připsání platby na náš účet.</p>
+            </div>
+        `;
+    } else if (paymentMethod === 'paypal') {
+        const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=densen123@seznam.cz&currency_code=CZK&amount=${total}&item_name=Objednavka%20${orderId}`;
+        paymentInstructions = `
+            <div class="box">
+                <h3 style="color: #003087; margin-top: 0;">Platba přes PayPal:</h3>
+                <p>Klikněte na tlačítko níže a proveďte platbu na účet <strong>densen123@seznam.cz</strong>:</p>
+                <p style="text-align: center; margin-top: 20px;">
+                    <a href="${paypalUrl}" target="_blank" style="background-color: #ffc439; color: #003087; text-decoration: none; padding: 12px 30px; font-weight: bold; border-radius: 30px; display: inline-block;">Zaplatit přes PayPal</a>
+                </p>
+            </div>
+        `;
+    } else {
+        paymentInstructions = `
+            <div class="box" style="background-color: #f0fdf4; border-color: #bbf7d0;">
+                <p style="color: #166534; font-weight: bold; margin: 0;">✓ Platba kartou online proběhla úspěšně.</p>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #166534;">Vaše objednávka se již začíná připravovat k odeslání.</p>
+            </div>
+        `;
+    }
+
+    const itemsRows = items.map(item => `
+        <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #edf2f7;">
+                <img src="${item.image || ''}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; vertical-align: middle; margin-right: 10px;">
+                <span style="font-weight: 600; color: #2d3748;">${item.title}</span>
+            </td>
+            <td style="padding: 12px; text-align: right; border-bottom: 1px solid #edf2f7; color: #2d3748;">${item.retailPrice} Kč</td>
+        </tr>
+    `).join('');
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Potvrzení objednávky</title>
+        <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f7fafc; color: #2d3748; margin: 0; padding: 20px; }
+            .card { max-width: 600px; background: #ffffff; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+            .header { background: #1b4d3e; color: #ffffff; padding: 30px 20px; text-align: center; }
+            .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+            .content { padding: 35px 25px; line-height: 1.6; }
+            .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 25px 0; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th { text-align: left; padding: 12px; background: #edf2f7; color: #4a5568; font-size: 13px; font-weight: 700; }
+            .footer { background: #edf2f7; text-align: center; padding: 20px; font-size: 12px; color: #718096; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="header">
+                <h1>Děkujeme za vaši objednávku! 📦</h1>
+                <p style="margin: 5px 0 0 0; opacity: 0.9;">Číslo objednávky: #${orderId}</p>
+            </div>
+            <div class="content">
+                <p>Vážený zákazníku,</p>
+                <p>přijali jsme vaši objednávku v e-shopu <strong>Floriko</strong>. Níže naleznete rekapitulaci objednaného zboží a doručovacích údajů.</p>
+                
+                ${paymentInstructions}
+
+                <h3>Shrnutí objednávky:</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produkt</th>
+                            <th style="text-align: right;">Cena</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsRows}
+                        <tr>
+                            <td style="padding: 12px; font-weight: bold; border-top: 2px solid #edf2f7;">Celková cena:</td>
+                            <td style="padding: 12px; text-align: right; font-weight: bold; border-top: 2px solid #edf2f7; font-size: 18px; color: #1b4d3e;">${total} Kč</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 30px;">Doručovací adresa:</h3>
+                <p style="line-height: 1.4; background: #f8fafc; padding: 15px; border-radius: 8px;">
+                    <strong>Jméno:</strong> ${customer.name}<br>
+                    <strong>Adresa:</strong> ${customer.street}, ${customer.city}<br>
+                    <strong>E-mail:</strong> ${customer.email}
+                </p>
+
+                <p style="margin-top: 30px;">Pokud máte jakékoliv dotazy, neváhejte odpovědět na tento e-mail.</p>
+                <p>Krásný den,<br><strong>Tým Floriko</strong></p>
+            </div>
+            <div class="footer">
+                © 2026 Floriko.cz. Všechna práva vyhrazena.
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+    sendHtmlEmail(customer.email, `Potvrzení objednávky #${orderId} - Floriko`, html);
+}
+
+// 3. Shipping / Fulfillment Template
+function sendShippingEmail(customerName, email, orderId) {
+    const mockTracking = "VS-" + Math.floor(100000000 + Math.random() * 900000000) + "-CZ";
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Vaše objednávka byla odeslána</title>
+        <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f7fafc; color: #2d3748; margin: 0; padding: 20px; }
+            .card { max-width: 600px; background: #ffffff; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+            .header { background: #1b4d3e; color: #ffffff; padding: 35px 20px; text-align: center; }
+            .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+            .content { padding: 35px 25px; line-height: 1.6; }
+            .tracking-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; margin: 25px 0; }
+            .tracking-code { font-size: 18px; font-weight: 700; color: #2d3748; margin: 10px 0; }
+            .footer { background: #edf2f7; text-align: center; padding: 20px; font-size: 12px; color: #718096; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="header">
+                <h1>Balíček je na cestě! 📦✈️</h1>
+                <p style="margin: 5px 0 0 0; opacity: 0.9;">Objednávka #${orderId}</p>
+            </div>
+            <div class="content">
+                <p>Vážený zákazníku,</p>
+                <p>máme skvělou zprávu! Vaši objednávku jsme úspěšně zabalili a předali přepravní společnosti. Zboží je již na cestě k vám domů.</p>
+                
+                <div class="tracking-box">
+                    <p style="margin: 0; font-size: 14px; color: #718096;">Sledovací číslo zásilky:</p>
+                    <div class="tracking-code">${mockTracking}</div>
+                    <p style="margin: 15px 0 0 0;">
+                        <a href="https://www.postaonline.cz/trackandtrace" target="_blank" style="background-color: #1b4d3e; color: #ffffff; text-decoration: none; padding: 12px 30px; font-weight: bold; border-radius: 30px; display: inline-block;">Sledovat zásilku online</a>
+                    </p>
+                </div>
+
+                <p>Děkujeme za nákup a věříme, že vám radost z produktů Floriko udělá den o to hezčí!</p>
+                <p style="margin-top: 30px;">Krásný den,<br><strong>Tým Floriko</strong></p>
+            </div>
+            <div class="footer">
+                © 2026 Floriko.cz. Všechna práva vyhrazena.
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+    sendHtmlEmail(email, `Vaše objednávka #${orderId} byla odeslána! 📦`, html);
 }
 
 // ================= COUPONS ENDPOINTS =================
