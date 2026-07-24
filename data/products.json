@@ -84,5 +84,21 @@
     "retailPrice": 33,
     "compareAtPrice": 60,
     "category": "svetla"
+  },
+  {
+    "id": "prod_onolivysx",
+    "title": "",
+    "supplier": "aliexpress",
+    "cost": 0,
+    "suggestedRetail": "",
+    "image": "",
+    "images": [],
+    "description": "",
+    "reviews": [],
+    "specs": {},
+    "pdfManual": "",
+    "sourceUrl": "https://www.aliexpress.us/item/3256812251942541.html?spm=a2g0o.productlist.seoads.1.798ey0g2y0g27l&p4p_pvid=20260724063634854835831799760000630618_1&_gl=1*s0wm9r*_gcl_au*NDEyMDE4MDAxLjE3ODQ4OTg5MzQ.*_ga*MTUyNzY5MjUyNC4xNzg0ODk4OTM0*_ga_VED1YSGNC7*czE3ODQ4OTg5MzMkbzEkZzEkdDE3ODQ5MDAxOTMkajM4JGwwJGgw&gatewayAdapt=esp2usa4itemAdapt",
+    "retailPrice": 0,
+    "category": "other"
   }
 ]
