@@ -20,5 +20,25 @@
     "retailPrice": 1403,
     "compareAtPrice": 1500,
     "category": "zavlazovani"
+  },
+  {
+    "id": "prod_oe1d5lw3b",
+    "title": "1ks solární žárovky řetězová světla, venkovní vodotěsné zahradní lampy, zahrada, terasa, balkon, kempování, párty retro dekorace vílí lampy",
+    "supplier": "aliexpress",
+    "cost": 0,
+    "suggestedRetail": "",
+    "image": "https://ae-pic-a1.aliexpress-media.com/kf/S37ea85f7abc94c0ab41cbedda02bae7eA.jpg",
+    "images": [
+      "https://ae-pic-a1.aliexpress-media.com/kf/S37ea85f7abc94c0ab41cbedda02bae7eA.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S6f51ca74b8a64a7793e02b1d9360358d0.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S32c6a23a021042429d46ad5f34aa991ex.jpg"
+    ],
+    "description": "Barva světla: Teplá bílá\n\nVELIKOST: 5M10LED/8M20LED\n\nVlastnosti:\n\n*Retro design: Světlo využívá retro Edisonovy žárovky k vytvoření krásné atmosféry na vaší terase: nainstalujte solární světla pavilonu na verandu nebo střechu pavilonu a vytvořte retro vzhled hospody a příjemnou atmosféru párty. Dostatečně jasné pro pečení a jídlo, aniž by bylo příliš mastné. Užijte si to až do noci: Po plném nabití lze svítit nepřetržitě 5-6 hodin, tj. 6 hodin na přímém slunečním světle.\n\n*Snadná instalace: Díky flexibilitě instalace je to nejlepší světelný řetěz na karnevalové oslavy, narozeniny a večírky: umístěte solární panely kamkoli pomocí přiložených kolíků a klipů. Solární světla nevyžadují zásuvky, takže lze dobře osvětlit i prostory daleko od budov.",
+    "reviews": [],
+    "specs": {},
+    "pdfManual": "https://ae-pic-a1.aliexpress-media.com/kf/S5e095b6a373247559343d4e02b7f4454o.pdf?spm=a2g0o.detail.0.0.34362T6y2T6ym3&file=S5e095b6a373247559343d4e02b7f4454o.pdf",
+    "sourceUrl": "https://www.aliexpress.com/item/1005009252859699.html?spm=a2g0o.productlist.main.23.7fc6mjxemjxesb&algo_pvid=118d59c3-b46c-4edc-9dfc-23083cc2865e&algo_exp_id=118d59c3-b46c-4edc-9dfc-23083cc2865e-20&pdp_ext_f=%7B%22order%22%3A%223905%22%2C%22spu_best_type%22%3A%22price%22%2C%22eval%22%3A%221%22%2C%22fromPage%22%3A%22search%22%7D&pdp_npi=6%40dis%21EUR%2117.53%218.59%21%21%21132.10%2164.73%21%4021613a6017849008559776702e0e2e%2112000048485929259%21sea%21ES%210%21ABX%211%210%21n_tag%3A-29910%3Bd%3Adb1745b4%3Bm03_new_user%3A-29895&curPageLogUid=p3MHYGjKRlZw&utparam-url=scene%3Asearch%7Cquery_from%3A%7Cx_object_id%3A1005009252859699%7C_p_origin_prod%3A&gatewayAdapt=esp2glo",
+    "retailPrice": 0,
+    "category": "svetla"
   }
 ]
