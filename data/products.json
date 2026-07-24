@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "prod_s6npn82mw",
+    "title": "",
+    "supplier": "aliexpress",
+    "cost": 0,
+    "suggestedRetail": "",
+    "image": "https://ae-pic-a1.aliexpress-media.com/kf/Sa75ffa88dfc04ac4a380d77352ad274d2.jpg",
+    "images": [
+      "https://ae-pic-a1.aliexpress-media.com/kf/Sa75ffa88dfc04ac4a380d77352ad274d2.jpg"
+    ],
+    "description": "",
+    "reviews": [],
+    "specs": {},
+    "pdfManual": "",
+    "sourceUrl": "https://www.aliexpress.com/item/1005011750606399.html?spm=a2g0o.detail.0.0.3436DIRzDIRzlT&mp=1&pdp_npi=6%40dis%21CZK%21CZK+888.34%21CZK+888.34%21%21CZK+888.34%21%21%21%40210398e917849112578717786e10e2%2112000056446781995%21ct%21CZ%21117544369%21%211%210%21#nav-specification",
+    "retailPrice": 0,
+    "category": "other"
+  }
+]
