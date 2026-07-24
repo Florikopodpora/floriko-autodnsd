@@ -16,6 +16,7 @@ const ORDERS_FILE = path.join(DB_DIR, 'orders.json');
 const ACTIVITY_FILE = path.join(DB_DIR, 'activity.json');
 const COUPONS_FILE = path.join(DB_DIR, 'coupons.json');
 const GIT_TOKEN = process.env.GITHUB_TOKEN || null;
+const STRIPE_PUB_KEY = process.env.STRIPE_PUBLISHABLE_KEY || '';
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_51Pdummykey');
 
 // Ensure database files exist
@@ -379,42 +380,30 @@ adminApp.post('/api/store/order', (req, res) => {
     res.json({ success: true, orderId });
 });
 
-// Store Create Stripe Checkout Session
-adminApp.post('/api/store/create-checkout-session', async (req, res) => {
-    const { items, orderId, discountPercent } = req.body;
-    if (!items || items.length === 0 || !orderId) {
-        return res.status(400).json({ error: "Chybí položky nebo číslo objednávky" });
+// Store Get Stripe Config (Publishable Key)
+adminApp.get('/api/store/stripe-config', (req, res) => {
+    res.json({ publishableKey: STRIPE_PUB_KEY });
+});
+
+// Store Create Stripe Payment Intent
+adminApp.post('/api/store/create-payment-intent', async (req, res) => {
+    const { total, email } = req.body;
+    if (!total) {
+        return res.status(400).json({ error: "Chybí částka k zaplacení" });
     }
 
     try {
-        const factor = discountPercent ? (1 - parseFloat(discountPercent) / 100) : 1;
-
-        const lineItems = items.map(item => ({
-            price_data: {
-                currency: 'czk',
-                product_data: {
-                    name: item.title,
-                    images: item.image ? [item.image] : [],
-                },
-                unit_amount: Math.max(100, Math.round(item.retailPrice * factor * 100)),
-            },
-            quantity: 1,
-        }));
-
-        const origin = req.headers.origin || 'https://floriko.netlify.app';
-
-        const session = await stripe.checkout.sessions.create({
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(parseFloat(total) * 100),
+            currency: 'czk',
+            receipt_email: email,
             payment_method_types: ['card'],
-            line_items: lineItems,
-            mode: 'payment',
-            success_url: `${origin}/index.html?payment=success&orderId=${orderId}`,
-            cancel_url: `${origin}/index.html?payment=cancel`,
         });
 
-        res.json({ id: session.id, url: session.url });
+        res.json({ clientSecret: paymentIntent.client_secret });
     } catch (err) {
-        console.error("Chyba při vytváření Stripe Checkout session:", err.message);
-        res.status(500).json({ error: "Nepodařilo se vytvořit platební relaci" });
+        console.error("Chyba při vytváření Stripe Payment Intent:", err.message);
+        res.status(500).json({ error: "Nepodařilo se vytvořit platební transakci" });
     }
 });
 
