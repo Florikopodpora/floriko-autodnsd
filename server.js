@@ -16,6 +16,7 @@ const ORDERS_FILE = path.join(DB_DIR, 'orders.json');
 const ACTIVITY_FILE = path.join(DB_DIR, 'activity.json');
 const COUPONS_FILE = path.join(DB_DIR, 'coupons.json');
 const GIT_TOKEN = process.env.GITHUB_TOKEN || null;
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_51Pdummykey');
 
 // Ensure database files exist
 if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR);
@@ -376,6 +377,45 @@ adminApp.post('/api/store/order', (req, res) => {
     sendConfirmationEmail(customer, orderId, items, paymentMethod, total);
 
     res.json({ success: true, orderId });
+});
+
+// Store Create Stripe Checkout Session
+adminApp.post('/api/store/create-checkout-session', async (req, res) => {
+    const { items, orderId, discountPercent } = req.body;
+    if (!items || items.length === 0 || !orderId) {
+        return res.status(400).json({ error: "Chybí položky nebo číslo objednávky" });
+    }
+
+    try {
+        const factor = discountPercent ? (1 - parseFloat(discountPercent) / 100) : 1;
+
+        const lineItems = items.map(item => ({
+            price_data: {
+                currency: 'czk',
+                product_data: {
+                    name: item.title,
+                    images: item.image ? [item.image] : [],
+                },
+                unit_amount: Math.max(100, Math.round(item.retailPrice * factor * 100)),
+            },
+            quantity: 1,
+        }));
+
+        const origin = req.headers.origin || 'https://floriko.netlify.app';
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: lineItems,
+            mode: 'payment',
+            success_url: `${origin}/index.html?payment=success&orderId=${orderId}`,
+            cancel_url: `${origin}/index.html?payment=cancel`,
+        });
+
+        res.json({ id: session.id, url: session.url });
+    } catch (err) {
+        console.error("Chyba při vytváření Stripe Checkout session:", err.message);
+        res.status(500).json({ error: "Nepodařilo se vytvořit platební relaci" });
+    }
 });
 
 // Newsletter Signup
