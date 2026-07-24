@@ -109,6 +109,15 @@ adminApp.get('/', (req, res) => {
     res.send("<h1>Floriko API Server je plně funkční 🌿</h1><p>Tato adresa slouží jako databázové pozadí. Pro nákup prosím navštivte váš e-shop na Netlify.</p>");
 });
 
+const cleanImageUrl = (url) => {
+    if (!url) return '';
+    // Odstranění miniaturizačních přípon AliExpress, Temu atd. pro plné rozlišení
+    return url.replace(/_(?:[0-9]+x[0-9]+|Q[0-9]+)\.(?:jpg|png|jpeg|webp)(?:_[^/\\]+)?$/i, '')
+              .replace(/\.(?:jpg|png|jpeg|webp)_(?:[0-9]+x[0-9]+|Q[0-9]+).+$/i, (match) => {
+                  return match.split('_')[0];
+              });
+};
+
 // Import Product from Link
 adminApp.post('/api/import', async (req, res) => {
     const { url } = req.body;
@@ -191,8 +200,10 @@ adminApp.post('/api/import', async (req, res) => {
         // Parse images simply
         let images = [];
         if (image) {
-            const cleanImg = image.startsWith('//') ? 'https:' + image : image;
+            let cleanImg = image.startsWith('//') ? 'https:' + image : image;
+            cleanImg = cleanImageUrl(cleanImg);
             images.push(cleanImg);
+            image = cleanImg;
         }
 
         // Specs matching Diivoo Oscillating Sprinkler
@@ -227,7 +238,8 @@ Hlavní výhody:
             description: aiOverview,
             reviews: [],
             specs: specs,
-            pdfManual: pdfManual
+            pdfManual: pdfManual,
+            sourceUrl: url
         };
 
         res.json({ success: true, product: parsedProduct, fallback: isBlocked });
@@ -246,7 +258,8 @@ Hlavní výhody:
             description: "",
             reviews: [],
             specs: {},
-            pdfManual: ""
+            pdfManual: "",
+            sourceUrl: url
         };
 
         logActivity(`Import z ${domain} vyžaduje ruční zadání cen.`, 'warning');
@@ -372,6 +385,7 @@ adminApp.post('/api/store/order', (req, res) => {
             id: orderId + "-" + Math.floor(100 + Math.random() * 900),
             productId: cartItem.id,
             productTitle: cartItem.title,
+            productSourceUrl: cartItem.sourceUrl || "",
             customer: `${customer.name}, ${customer.city} (${customer.email})`,
             customerDetails: customer,
             retailPrice: cartItem.retailPrice,
