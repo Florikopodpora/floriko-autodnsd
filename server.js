@@ -5,6 +5,10 @@ const path = require('path');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
 
 
 const adminApp = express();
@@ -442,14 +446,18 @@ const getTransporter = () => {
         return null;
     }
     const host = process.env.EMAIL_HOST || (process.env.EMAIL_USER.includes('@gmail.com') ? 'smtp.gmail.com' : 'smtp.seznam.cz');
-    const port = process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : 465;
+    // Default to port 587 for cloud servers to bypass port blocks, secure: false
+    const port = process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : 587;
     return nodemailer.createTransport({
         host: host,
         port: port,
-        secure: port === 465,
+        secure: port === 465, // true only for SSL on port 465
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
+        },
+        tls: {
+            rejectUnauthorized: false // bypass TLS certificate warnings
         }
     });
 };
