@@ -151,5 +151,28 @@
     "retailPrice": 1037,
     "compareAtPrice": 1500,
     "category": "zavlazovani"
+  },
+  {
+    "id": "prod_go1691bds",
+    "title": "SucceBuy Navíjecí hadice 82 stop x 1/2 palce 180° otočný držák na zeď Zahradní hadice s tryskou s 9 vzory",
+    "supplier": "AliExpress",
+    "cost": 1230,
+    "suggestedRetail": "",
+    "image": "https://ae-pic-a1.aliexpress-media.com/kf/Sa45a798df7f0468881169e7f730996beB.jpg",
+    "images": [
+      "https://ae-pic-a1.aliexpress-media.com/kf/Sa45a798df7f0468881169e7f730996beB.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/Sa5b26656949048aebfa0eaed30b4c35cL.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/Sa45a798df7f0468881169e7f730996beB.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S03027ebdde484663a5dde41259b6bdcbN.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S1c84eee1789b44dc9305c29c10125c99P.jpg"
+    ],
+    "description": "",
+    "reviews": [],
+    "specs": {},
+    "pdfManual": "",
+    "sourceUrl": "https://www.aliexpress.us/item/3256808107886487.html?spm=a2g0o.productlist.main.10.5373hXDJhXDJQP&algo_pvid=9e9f549a-af81-46ca-a23d-a229fc420143&algo_exp_id=9e9f549a-af81-46ca-a23d-a229fc420143-9&pdp_ext_f=%7B%22order%22%3A%22862%22%2C%22eval%22%3A%221%22%2C%22fromPage%22%3A%22search%22%7D&pdp_npi=6%40dis%21EUR%21223.11%2163.93%21%21%21248.07%2171.09%21%4021613bf617848993178924059e1f70%2112000044536880175%21sea%21ES%210%21ABX%211%210%21n_tag%3A-29910%3Bd%3Adb1745b4%3Bm03_new_user%3A-29895%3BpisId%3A5000000211724169&curPageLogUid=4JHcJAYCvuqa&utparam-url=scene%3Asearch%7Cquery_from%3A%7Cx_object_id%3A1005008294201239%7C_p_origin_prod%3A&gatewayAdapt=esp2usa4itemAdapt",
+    "retailPrice": 1942,
+    "compareAtPrice": 2352,
+    "category": "zavlazovani"
   }
 ]
