@@ -67,5 +67,28 @@
     "retailPrice": 1042,
     "compareAtPrice": 1542,
     "category": "svetla"
+  },
+  {
+    "id": "prod_44s27g8a8",
+    "title": "Samozavlažovací květináč, dvoupatrový magnetický plast, samopohlcující bavlněný líný květináč, módní květináč, domácí zahradní květináče, potřeby",
+    "supplier": "aliexpress",
+    "cost": 247.59,
+    "suggestedRetail": "",
+    "image": "https://ae-pic-a1.aliexpress-media.com/kf/S184d201a0d8a465dbf9e77024f19ba3bh.jpg?has_lang=1&ver=1_220x220q75.jpg_.avif",
+    "images": [
+      "https://ae-pic-a1.aliexpress-media.com/kf/S184d201a0d8a465dbf9e77024f19ba3bh.jpg?has_lang=1&ver=1_220x220q75.jpg_.avif",
+      "https://ae-pic-a1.aliexpress-media.com/kf/Se59b61034b3547b2ac31f4c30f921dda5.png?has_lang=1&ver=1",
+      "https://ae-pic-a1.aliexpress-media.com/kf/Se361eb270cf842dfb2328046839cca42z.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S0719b5af400d46b19ac5cc16ca462127H.jpg?has_lang=1&ver=1_220x220q75.jpg_.avif",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S9e485cd1536b4bdba1f8a91623b0f256b.jpg?has_lang=1&ver=1_220x220q75.jpg_.avif"
+    ],
+    "description": "1 kus samozavlažovacího květináče který vám zaručeně ulehčí život",
+    "reviews": [],
+    "specs": {},
+    "pdfManual": "",
+    "sourceUrl": "https://www.aliexpress.com/item/1005009909910573.html?spm=a2g0o.productlist.main.20.7e53Sk3oSk3oPh&aem_p4p_detail=202607260844015455238450587950000174131&algo_pvid=caf4aa22-a432-4a9b-a188-f926012ab540&algo_exp_id=caf4aa22-a432-4a9b-a188-f926012ab540-19&pdp_ext_f=%7B%22order%22%3A%22543%22%2C%22spu_best_type%22%3A%22price%22%2C%22eval%22%3A%221%22%2C%22fromPage%22%3A%22search%22%7D&pdp_npi=6%40dis%21CZK%21515.77%21247.59%21%21%21160.72%2177.15%21%400b1585c117850806415742305e0d89%2112000050561124145%21sea%21CZ%210%21ABX%211%210%21n_tag%3A-29910%3Bd%3Aae7aa093%3Bm03_new_user%3A-29895&curPageLogUid=2CYja9Euf0DS&utparam-url=scene%3Asearch%7Cquery_from%3A%7Cx_object_id%3A1005009909910573%7C_p_origin_prod%3A&search_p4p_id=202607260844015455238450587950000174131_5",
+    "retailPrice": 391,
+    "compareAtPrice": 691,
+    "category": "kvetinace"
   }
 ]
