@@ -90,5 +90,28 @@
     "retailPrice": 391,
     "compareAtPrice": 691,
     "category": "kvetinace"
+  },
+  {
+    "id": "prod_loq9kr54n",
+    "title": "Zahradní klíčový kryt, realistický podzemní zalévací klíč, bez potřeby baterie, odolný plast pro venkovní zahradní zabezpečení",
+    "supplier": "aliexpress",
+    "cost": 87.76,
+    "suggestedRetail": "",
+    "image": "https://ae-pic-a1.aliexpress-media.com/kf/S0e4728bb5932482d807269ee19f92b13x.jpg",
+    "images": [
+      "https://ae-pic-a1.aliexpress-media.com/kf/S0e4728bb5932482d807269ee19f92b13x.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S2ed8f0499d784da49efd9232940c71a52.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S7c7a3904371d4a6fa3ed807fff991799U.jpg?has_lang=1&ver=2_220x220q75.jpg_.avif",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S58ac93284cb84f8ab68a018385f45a3eM.jpg",
+      "https://ae-pic-a1.aliexpress-media.com/kf/S8283003670b547f0bdeba2f989c1f9afw.jpg?has_lang=1&ver=2_220x220q75.jpg_.avif"
+    ],
+    "description": "",
+    "reviews": [],
+    "specs": {},
+    "pdfManual": "",
+    "sourceUrl": "https://www.aliexpress.com/item/1005010149284927.html?spm=a2g0o.detail.pcDetailTopMoreOtherSeller.1.6b55jQEsjQEsoa&gps-id=pcDetailTopMoreOtherSeller&scm=1007.40050.354490.0&scm_id=1007.40050.354490.0&scm-url=1007.40050.354490.0&pvid=54a25db2-315a-487b-ab35-fe11c213fa30&_t=gps-id%3ApcDetailTopMoreOtherSeller%2Cscm-url%3A1007.40050.354490.0%2Cpvid%3A54a25db2-315a-487b-ab35-fe11c213fa30%2Ctpp_buckets%3A668%232846%238113%231998&pdp_ext_f=%7B%22order%22%3A%2219161%22%2C%22eval%22%3A%221%22%2C%22sceneId%22%3A%2230050%22%2C%22fromPage%22%3A%22recommend%22%7D&pdp_npi=6%40dis%21CZK%21182.85%2187.76%21%21%2156.98%2127.35%21%4021038efe17850814020416690e0d74%2112000051324855547%21rec%21CZ%21%21ABXZ%211%210%21n_tag%3A-29910%3Bd%3Aae7aa093%3Bm03_new_user%3A-29895&utparam-url=scene%3ApcDetailTopMoreOtherSeller%7Cquery_from%3A%7Cx_object_id%3A1005010149284927%7C_p_origin_prod%3A",
+    "retailPrice": 150,
+    "compareAtPrice": 399,
+    "category": "other"
   }
 ]
